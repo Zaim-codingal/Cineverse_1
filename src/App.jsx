@@ -148,7 +148,58 @@ try {
         </span>
 
       </div>
-);
 
-   
-  
+      <div classname='ai-content'>
+        {aiMessage ? (
+          <div className='ai-text'>
+            {aiMessage.split('/\d+\.\s/').map((line, index) => (
+              .filter(
+                (movie) => movie.trim.length > 20
+              )
+              .map(
+                (movie, index) => (
+                  <div key={index}
+                    className='movie-suggestion'>
+                    <h3>(movie {""})
+                    {index + 1}
+                    <h3/>
+                    <p>{movie.trim()}</p>
+                  </div>
+                ))
+              )}
+            </div>
+        ) : (
+          <p className='placeholder'>
+            Choose age, mood, genre, and language to get movie recommendations!
+            <br/>
+            <br/>
+             Then Click
+            <strong>
+              {""}
+              Recommend Movie
+            </strong>
+            !
+          </p>
+       
+        )}
+
+      
+      </div>
+    </div>
+
+    <h2>
+      Movie Cards:
+    </h2>
+
+    <div className='movie-list'>
+      {movieResult.map((movie) => (
+        <MovieCard key={movie.id} movie={movie} />
+      ))
+        }
+    </div>
+  </div>
+  </div>
+
+  );
+
+          
