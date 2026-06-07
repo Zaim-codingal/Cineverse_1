@@ -1,291 +1,406 @@
-import { useState } from 'react';
-import Navbar from './Navbar';
-import  HeroSection  from './HeroSection';
-import MovieCard from './MovieCard';
-import { movies } from './data';
-import { genres, languages, moods } from './constants';
-import { API_KEY } from './config';
-
+import { useState } from "react";
+import Navbar from "./Navbar";
+import HeroSection from "./HeroSection";
+import MovieCard from "./MovieCard";
+import { movies } from "./data";
+import {
+  genres,
+  moods,
+  languages
+} from "./constants";
+import { API_KEY } from "./config";
 
 export default function App() {
-const [age, setAge] = useState('');
-const [mood, setMood] = useState('');
-const [genre, setGenre] = useState('');
-const [language, setLanguage] = useState('');
 
-const [aiMessage, setAiMessage] = useState('');
+  // Save user choices
+  const [age, setAge] =
+    useState("");
 
-const [movieResult, setMovieResult] = useState([]);
+  const [mood, setMood] =
+    useState("");
 
-async function reccomendMovies() {
-  let cleanGenre = genre.replace(/[^\w\s]/gi, "").trim();
+  const [genre, setGenre] =
+    useState("");
 
- let filteredMovies = movies.filter(
+  const [language,
+    setLanguage] =
+    useState("");
 
-(movie) =>
+  // AI message
+  const [aiMessage,
+    setAiMessage] =
+    useState("");
 
-movie.genre.toLowerCase() === cleanGenre.toLowerCase() &&
+  // Movie cards
+  const [movieResult,
+    setMovieResult] =
+    useState([]);
 
-movie.language.toLowerCase() === language.toLowerCase()
+  // Recommend movie
+  async function recommendMovie() {
 
-);
-  setMovieResult(filteredMovies);
+    // Remove emoji from genre
+    let cleanGenre =
+      genre
+        .replace(/[^\w\s]/gi, "")
+        .trim();
 
-  
+    // Filter movies
+    let filteredMovies =
+      movies.filter(
+        (movie) =>
+          movie.genre
+            .toLowerCase()
+            .includes(
+              cleanGenre
+                .toLowerCase()
+            ) &&
+          movie.language ===
+          language
+      );
 
+    setMovieResult(
+      filteredMovies
+    );
 
-const prompt = `
-
+    // AI Prompt
+    const prompt = `
 Recommend 5 movies for:
 
 Age: ${age}
-
 Mood: ${mood}
-
 Genre: ${genre}
-
 Language: ${language}
 
 Rules:
-
 1. Do NOT write introduction text.
-
 2. Start directly from movie list.
-
 3. Use numbering.
-
 4. Keep answers short.
 
 Example:
 
 1. Toy Story - Fun animated movie
-
 2. Frozen - Magical adventure
-
 `;
 
-try {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
+    try {
 
-    headers: {
-      'Content-Type': 'application/json',
+      const response =
+        await fetch(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            method: "POST",
 
-      Authorization: `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.1-8b-instant',
-      messages: [
-        { role: 'user', content: prompt }
-      ]
-    })
-  });
+            headers: {
+              "Content-Type":
+                "application/json",
 
-  const data = await response.json();
+              Authorization:
+                `Bearer ${API_KEY}`
+            },
 
-  setAiMessage(data.choices[0].message.content);
+            body: JSON.stringify({
+              model:
+                "llama-3.1-8b-instant",
 
-} catch (error) {
-  console.log (error);
-  
-setAiMessage(
+              messages: [
+                {
+                  role: "user",
+                  content:
+                    prompt
+                }
+              ]
+            })
+          }
+        );
 
-"AI is not working."
+      const data =
+        await response.json();
 
-);
-}}
+      setAiMessage(
+        data.choices[0]
+          .message.content
+      );
 
-}
+    } catch (error) {
+
+      console.log(error);
+
+      setAiMessage(
+        "AI is not working."
+      );
+    }
+  }
+
   return (
-
     <div>
+
       <Navbar />
 
       <HeroSection />
 
-      <h1>
-        Find Your Movie!
-      </h1>
+      <div className="container">
 
-      <select
-onChange={(e) =>
-setAge(
-e.target.value
-)
-}
->
-        <option>Select Age</option>
-        <option>Kid</option>
-        <option>Teen</option>
-        <option>Adult</option>
-      </select>
+        <h1>
+          🎬 Find Your Movie
+        </h1>
 
-      <select onChange={(e) => setMood(e.target.value)}>
-        <option >Select Mood</option>
+        {/* AGE */}
 
-        {age && moods[age].map((item, index) => (
-          <option key={index}> {item}
+        <select
+          onChange={(e) =>
+            setAge(
+              e.target.value
+            )
+          }
+        >
+
+          <option>
+            Select Age
           </option>
-        ))}
-      </select>
 
-      <select onChange={(e) => setGenre(e.target.value)}>
-        <option >Select Genre</option>
-
-
-{age &&
-genres[age].map(
-(
-
-item,
-
-index
-
-) => (
-
-<option
-
-key={index}
-
->
-
-{item}
-
-</option>
-
-)
-
-)}
-
-
-      </select>
-
-      <select onChange={(e) => setLanguage(e.target.value)}>
-        <option >Select Language</option>
-
-        {languages.map((item, index) => (
-          <option key={index}> {item}
+          <option>
+            Kids
           </option>
-        ))}
-      </select>
 
-      <br/>
-      <br/>
+          <option>
+            Teen
+          </option>
 
-      <button onClick={reccomendMovie}>
-        Recommend Movie
-      </button>
+          <option>
+            Adult
+          </option>
 
-      <div className='ai-box'>
+        </select>
 
-        <div className='ai-header'>
-          <h2>AI Recommendations:</h2>
-      
-        <span className='badge'>
-          Smart Reccomendations
-        </span>
+        {/* MOOD */}
 
-      </div>
+        <select
+          onChange={(e) =>
+            setMood(
+              e.target.value
+            )
+          }
+        >
 
-      <div classname='ai-content'>
-       {aiMessage ? (
+          <option>
+            Select Mood
+          </option>
 
-<div className="ai-text">
+          {age &&
+            moods[age].map(
+              (
+                item,
+                index
+              ) => (
 
-{aiMessage
+                <option
+                  key={index}
+                >
+                  {item}
+                </option>
 
-.split(
+              )
+            )}
 
-/\d+\.\s/
+        </select>
 
-)
+        {/* GENRE */}
 
-.filter(
+        <select
+          onChange={(e) =>
+            setGenre(
+              e.target.value
+            )
+          }
+        >
 
-(movie) =>
+          <option>
+            Select Genre
+          </option>
 
-movie
+          {age &&
+            genres[age].map(
+              (
+                item,
+                index
+              ) => (
 
-.trim()
+                <option
+                  key={index}
+                >
+                  {item}
+                </option>
 
-.length >
+              )
+            )}
 
-20
+        </select>
 
-)
+        {/* LANGUAGE */}
 
-.map(
+        <select
+          onChange={(e) =>
+            setLanguage(
+              e.target.value
+            )
+          }
+        >
 
-(
+          <option>
+            Select Language
+          </option>
 
-movie,
+          {languages.map(
+            (
+              item,
+              index
+            ) => (
 
-index
+              <option
+                key={index}
+              >
+                {item}
+              </option>
 
-) => (
+            )
+          )}
 
-<div
+        </select>
 
-key={index}
+        <br />
+        <br />
 
-className="movie-suggestion"
+        {/* BUTTON */}
 
->
+        <button
+          onClick={
+            recommendMovie
+          }
+        >
+          🎥 Recommend Movie
+        </button>
 
-<h3>
+        {/* AI SECTION */}
 
-🎬 Movie{" "}
+        <div className="ai-box">
 
-{index + 1}
+          <div className="ai-header">
 
-</h3>
+            <h2>
+              🤖 AI Movie Expert
+            </h2>
 
-<p>
+            <span className="badge">
 
-{movie.trim()}
+              Smart Recommendation
 
-</p>
+            </span>
 
-</div>
+          </div>
 
-))}
+          <div className="ai-content">
 
-</div>
+            {aiMessage ? (
 
-) : (
+              <div className="ai-text">
 
+                {aiMessage
+                  .split(
+                    /\d+\.\s/
+                  )
 
-          <p className='placeholder'>
-            Choose age, mood, genre, and language to get movie recommendations!
-            <br/>
-            <br/>
-             Then Click
-            <strong>
-              {""}
-              Recommend Movie
-            </strong>
-            !
-          </p>
-       
-        )}
+                  .filter(
+                    (movie) =>
+                      movie
+                        .trim()
+                        .length >
+                      20
+                  )
 
-      
-      </div>
-    
+                  .map(
+                    (
+                      movie,
+                      index
+                    ) => (
+
+                      <div
+                        key={index}
+                        className="movie-suggestion"
+                      >
+
+                        <h3>
+
+                          🎬 Movie{" "}
+                          {index + 1}
+
+                        </h3>
+
+                        <p>
+                          {movie.trim()}
+                        </p>
+
+                      </div>
+
+                    ))}
+
+              </div>
+
+            ) : (
+
+              <p className="placeholder">
+
+                🎬 Choose
+                age, mood,
+                genre and
+                language
+
+                <br />
+                <br />
+
+                Then click
+
+                <strong>
+
+                  {" "}
+                  Recommend
+                  Movie
+
+                </strong>
+
+              </p>
+
+            )}
+
+          </div>
+
         </div>
-    <h2>
-      Movie Cards:
-    </h2>
 
-    <div className='movie-list'>
-      {movieResult.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} />
-      ))
-        }
+        {/* MOVIE CARDS */}
 
+        <h2>
+          🍿 Movie Cards
+        </h2>
 
-          </div>
-          </div>
-          </div>
-);
-        }
+        <div className="movie-list">
+
+          {movieResult.map(
+            (movie) => (
+
+              <MovieCard
+                key={
+                  movie.id
+                }
+                movie={movie}
+              />
+
+            )
+          )}
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
